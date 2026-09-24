@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="google" content="notranslate">
+<title>Argentina World Cup Puzzle</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#d9f5ff,#fff,#d9f5ff);color:#102a43;min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:18px}
+.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 28px rgba(0,0,0,.12)}
+h1{margin:0 0 8px;text-align:center;font-size:clamp(25px,6vw,42px)}
+.subtitle{text-align:center;margin:0 0 16px;color:#486581}
+.stats{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700;margin-bottom:14px}
+.stat{background:#eef8ff;border-radius:12px;padding:10px 14px}
+.puzzle{width:min(100%,620px);aspect-ratio:1/1;margin:0 auto 18px;position:relative;overflow:hidden;border-radius:16px;background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Argentina%20Starting%20XI%20Argentina%20v%20Egypt%207%20July%202026-118.jpg");background-size:100% 100%;background-position:center;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);border:4px solid #8ed8f8}
+.piece{border:1px solid rgba(255,255,255,.55);background:rgba(8,45,70,.88);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(18px,5vw,34px);font-weight:900}
+.piece.unlocked{background:transparent;color:transparent}
+.question{font-size:clamp(20px,5vw,30px);font-weight:800;line-height:1.25;margin:0 0 18px;text-align:center}
+.answers{display:grid;gap:11px}
+.answer{width:100%;border:0;border-radius:13px;padding:14px 16px;font-size:17px;font-weight:700;cursor:pointer;background:#eaf6ff;color:#12344d}
+.answer:disabled{cursor:default}
+.feedback{min-height:28px;text-align:center;font-weight:800;margin-top:14px}
+.next{display:none;margin:12px auto 0;border:0;border-radius:12px;padding:13px 24px;font-size:17px;font-weight:800;cursor:pointer;background:#68c9ef;color:#07324d}
+.next.show{display:block}
+.end{display:none;text-align:center}
+.end.show{display:block}
+.end h2{font-size:34px;margin:5px 0 10px}
+.end p{font-size:18px}
+.restart{border:0;border-radius:12px;padding:13px 24px;font-size:17px;font-weight:800;cursor:pointer;background:#68c9ef;color:#07324d}
+.note{text-align:center;color:#627d98;font-size:13px;margin-top:18px}
+</style>
+</head>
+<body translate="no">
+<main class="wrap">
+<section class="card">
+<h1>🇦🇷 Argentina World Cup Puzzle</h1>
+<p class="subtitle" translate="no">Answer correctly to unlock the 9 puzzle pieces!</p>
+<div class="stats" translate="no">
+<div class="stat">❤️ Lives: <span id="lives">3</span></div>
+<div class="stat">🧩 Pieces: <span id="piecesCount">0</span> / 9</div>
+</div>
+
+<div class="puzzle">
+<div class="piece" id="piece0">?</div><div class="piece" id="piece1">?</div><div class="piece" id="piece2">?</div>
+<div class="piece" id="piece3">?</div><div class="piece" id="piece4">?</div><div class="piece" id="piece5">?</div>
+<div class="piece" id="piece6">?</div><div class="piece" id="piece7">?</div><div class="piece" id="piece8">?</div>
+</div>
+
+<div id="gameCard" translate="no">
+<p class="question" id="question" translate="no"></p>
+<div class="answers" id="answers" translate="no"></div>
+<div class="feedback" id="feedback" translate="no"></div>
+<button class="next" id="nextButton" type="button" translate="no">Next Question</button>
+</div>
+
+<div class="end" id="endScreen" translate="no">
+<h2 id="endTitle"></h2>
+<p id="endText"></p>
+<button class="restart" id="restart" type="button">Play Again</button>
+</div>
+
+<p class="note" translate="no">Questions are in English. Automatic page translation is disabled where supported.</p>
+</section>
+</main>
+
+<script>
+const questions = [
+{q:"Who was Argentina's head coach at the 2022 World Cup?",a:"Lionel Scaloni",o:["Lionel Scaloni","Jorge Sampaoli","Marcelo Bielsa"]},
+{q:"Who did Argentina lose to in their first match of the 2022 World Cup?",a:"Saudi Arabia",o:["Saudi Arabia","Mexico","Poland"]},
+{q:"Which group was Argentina in at the 2022 World Cup?",a:"Group C",o:["Group B","Group C","Group D"]},
+{q:"Who was Argentina's second opponent in the 2022 group stage?",a:"Mexico",o:["Mexico","Poland","Australia"]},
+{q:"Who was Argentina's third opponent in the 2022 group stage?",a:"Poland",o:["Poland","Mexico","Croatia"]},
+{q:"Who did Argentina play in the Round of 16 at the 2022 World Cup?",a:"Australia",o:["Australia","Netherlands","Croatia"]},
+{q:"Who did Argentina play in the quarter-finals at the 2022 World Cup?",a:"Netherlands",o:["Netherlands","France","Croatia"]},
+{q:"Who did Argentina play in the semi-finals at the 2022 World Cup?",a:"Croatia",o:["Croatia","Brazil","France"]},
+{q:"Who did Argentina play in the 2022 World Cup final?",a:"France",o:["France","Croatia","Netherlands"]},
+{q:"What was the score after 90 minutes of Argentina vs France in the 2022 final?",a:"2-2",o:["2-2","3-3","1-1"]},
+{q:"What was the score after extra time in the 2022 World Cup final?",a:"3-3",o:["3-3","2-2","4-3"]},
+{q:"How many stars were on Argentina's shirt after winning the 2022 World Cup?",a:"Three",o:["Two","Three","Four"]},
+{q:"What were the main colors of Argentina's shirt?",a:"Light blue and white",o:["Light blue and white","Blue and red","White and green"]},
+{q:"At which stadium was the 2022 World Cup final played?",a:"Lusail Stadium",o:["Lusail Stadium","Wembley Stadium","Lusail Sports Arena"]},
+{q:"How many matches did Argentina win at the 2022 World Cup?",a:"Six",o:["Four","Five","Six"]},
+{q:"Who was Argentina's head coach at the 2026 World Cup?",a:"Lionel Scaloni",o:["Lionel Scaloni","Marcelo Bielsa","Jorge Sampaoli"]},
+{q:"Which group was Argentina in at the 2026 World Cup?",a:"Group J",o:["Group H","Group J","Group K"]},
+{q:"Who was Argentina's first opponent at the 2026 World Cup?",a:"Algeria",o:["Algeria","Austria","Jordan"]},
+{q:"Who was Argentina's second opponent in the 2026 group stage?",a:"Austria",o:["Austria","Algeria","Jordan"]},
+{q:"Who was Argentina's third opponent in the 2026 group stage?",a:"Jordan",o:["Jordan","Austria","Egypt"]},
+{q:"What position did Argentina finish in their 2026 group?",a:"First",o:["First","Second","Third"]},
+{q:"Who did Argentina play in the Round of 32 at the 2026 World Cup?",a:"Cape Verde",o:["Cape Verde","Egypt","Switzerland"]},
+{q:"Who did Argentina play in the Round of 16 at the 2026 World Cup?",a:"Egypt",o:["Egypt","Cape Verde","England"]},
+{q:"Who did Argentina play in the quarter-finals at the 2026 World Cup?",a:"Switzerland",o:["Switzerland","England","Spain"]},
+{q:"Who did Argentina play in the semi-finals at the 2026 World Cup?",a:"England",o:["England","Spain","Switzerland"]},
+{q:"Who did Argentina play in the 2026 World Cup final?",a:"Spain",o:["Spain","England","France"]},
+{q:"Which team defeated Argentina in the 2026 World Cup final?",a:"Spain",o:["Spain","England","France"]},
+{q:"Did Argentina lose any match in the 2026 group stage?",a:"No",o:["No","Yes, once","Yes, twice"]},
+{q:"How many matches did Argentina win in the 2026 World Cup group stage?",a:"Three",o:["One","Two","Three"]},
+{q:"How many teams were in Argentina's group at the 2026 World Cup?",a:"Four",o:["Three","Four","Five"]}
+];
+
+const MAX_LIVES = 3;
+const WIN_PIECES = 9;
+let lives = MAX_LIVES;
+let pieces = 0;
+let used = new Set();
+let current = null;
+let locked = false;
+let waitingForNext = false;
+
+const livesEl = document.getElementById("lives");
+const piecesEl = document.getElementById("piecesCount");
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const feedbackEl = document.getElementById("feedback");
+const nextButton = document.getElementById("nextButton");
+const gameCard = document.getElementById("gameCard");
+const endScreen = document.getElementById("endScreen");
+const endTitle = document.getElementById("endTitle");
+const endText = document.getElementById("endText");
+const restartBtn = document.getElementById("restart");
+
+function shuffle(array){
+  const result = array.slice();
+  for(let i=result.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const temp=result[i];
+    result[i]=result[j];
+    result[j]=temp;
+  }
+  return result;
+}
+
+function updateStats(){
+  livesEl.textContent = lives;
+  piecesEl.textContent = pieces;
+}
+
+function nextQuestion(){
+  if(pieces >= WIN_PIECES){
+    showWin();
+    return;
+  }
+
+  const available = [];
+  for(let i=0;i<questions.length;i++){
+    if(!used.has(i)) available.push(i);
+  }
+
+  if(available.length === 0){
+    showWin();
+    return;
+  }
+
+  const index = available[Math.floor(Math.random()*available.length)];
+  used.add(index);
+  current = questions[index];
+
+  questionEl.textContent = current.q;
+  answersEl.innerHTML = "";
+  feedbackEl.textContent = "";
+  nextButton.classList.remove("show");
+  waitingForNext = false;
+  locked = false;
+
+  const options = shuffle(current.o);
+  options.forEach(function(option){
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "answer";
+    button.textContent = option;
+    button.setAttribute("translate","no");
+    button.addEventListener("click",function(){
+      answer(option);
+    });
+    answersEl.appendChild(button);
+  });
+}
+
+function answer(option){
+  if(locked || !current) return;
+  locked = true;
+
+  const buttons = document.querySelectorAll(".answer");
+  buttons.forEach(function(button){ button.disabled = true; });
+
+  if(option === current.a){
+    pieces++;
+    const piece = document.getElementById("piece" + (pieces-1));
+    if(piece){
+      piece.classList.add("unlocked");
+      piece.textContent = "";
+    }
+
+    updateStats();
+
+    if(pieces >= WIN_PIECES){
+      feedbackEl.textContent = "🎉 Correct! You unlocked the final piece!";
+      nextButton.classList.remove("show");
+      setTimeout(showWin,700);
+    }else{
+      feedbackEl.textContent = "✅ Correct! Piece unlocked. Press Next Question.";
+      nextButton.classList.add("show");
+      waitingForNext = true;
+    }
+  }else{
+    lives--;
+    updateStats();
+
+    buttons.forEach(function(button){
+      if(button.textContent === current.a){
+        button.style.background = "#b9f6c5";
+        button.style.color = "#14532d";
+        button.textContent = "✅ " + current.a;
+      }
+    });
+
+    if(lives <= 0){
+      feedbackEl.textContent = "❌ Wrong. Correct answer: " + current.a;
+      nextButton.classList.remove("show");
+      setTimeout(showGameOver,1300);
+    }else{
+      feedbackEl.textContent = "❌ Wrong. Correct answer: " + current.a + ". Press Next Question.";
+      nextButton.classList.add("show");
+      waitingForNext = true;
+    }
+  }
+}
+
+function showGameOver(){
+  gameCard.style.display = "none";
+  endScreen.classList.add("show");
+  endTitle.textContent = "💀 GAME OVER";
+  endText.textContent = "You ran out of lives. Better luck next time!";
+}
+
+function showWin(){
+  gameCard.style.display = "none";
+  endScreen.classList.add("show");
+  endTitle.textContent = "🎉 CHALLENGE COMPLETE!";
+  endText.textContent = "You unlocked all 9 puzzle pieces. Congratulations!";
+}
+
+function restart(){
+  lives = MAX_LIVES;
+  pieces = 0;
+  used = new Set();
+  current = null;
+  locked = false;
+  waitingForNext = false;
+  nextButton.classList.remove("show");
+
+  document.querySelectorAll(".piece").forEach(function(piece){
+    piece.classList.remove("unlocked");
+    piece.textContent = "?";
+  });
+
+  updateStats();
+  gameCard.style.display = "block";
+  endScreen.classList.remove("show");
+  nextQuestion();
+}
+
+nextButton.addEventListener("click",function(){
+  if(!waitingForNext) return;
+  nextQuestion();
+});
+
+restartBtn.addEventListener("click",restart);
+updateStats();
+nextQuestion();
+</script>
+</body>
+</html>
